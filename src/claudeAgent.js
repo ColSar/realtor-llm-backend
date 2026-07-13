@@ -8,6 +8,7 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { BASE_TOOLS, executeTool } from "./tools.js";
+import { getMockReply } from "./mockResponses.js";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -17,9 +18,22 @@ const MAX_TOOL_ROUNDS = 5;
 /**
  * @param {string} systemPrompt - role-specific instructions (realtor vs buyer)
  * @param {Array}  messages - conversation history, e.g. [{role:"user", content:"..."}]
+ * @param {string} role - "buyer" | "realtor", only needed for mock mode's canned replies
  * @returns {Promise<{reply: string, messages: Array}>} final assistant text + full updated history
  */
-export async function runChat(systemPrompt, messages) {
+export async function runChat(systemPrompt, messages, role = "buyer") {
+  // MOCK_MODE lets you demo the full UI without spending API credits or
+  // needing real MLS access. Set MOCK_MODE=true in .env / your host's
+  // environment variables to turn this on.
+  if (process.env.MOCK_MODE === "true") {
+    const lastUserMessage = [...messages]
+      .reverse()
+      .find((m) => m.role === "user" && typeof m.content === "string");
+    const reply = getMockReply(role, lastUserMessage?.content);
+    const convo = [...messages, { role: "assistant", content: [{ type: "text", text: reply }] }];
+    return { reply, messages: convo };
+  }
+
   let convo = [...messages];
 
   for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {

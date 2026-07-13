@@ -23,7 +23,7 @@ router.post("/chat", async (req, res) => {
       return res.status(400).json({ error: "messages array is required" });
     }
 
-    const { reply, messages: updatedMessages } = await runChat(REALTOR_SYSTEM_PROMPT, messages);
+    const { reply, messages: updatedMessages } = await runChat(REALTOR_SYSTEM_PROMPT, messages, "realtor");
     res.json({ reply, messages: updatedMessages });
   } catch (err) {
     console.error("Realtor chat error:", err);

@@ -25,7 +25,7 @@ router.post("/chat", async (req, res) => {
       return res.status(400).json({ error: "messages array is required" });
     }
 
-    const { reply, messages: updatedMessages } = await runChat(BUYER_SYSTEM_PROMPT, messages);
+    const { reply, messages: updatedMessages } = await runChat(BUYER_SYSTEM_PROMPT, messages, "buyer");
     res.json({ reply, messages: updatedMessages });
   } catch (err) {
     console.error("Buyer chat error:", err);
